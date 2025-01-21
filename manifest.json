@@ -9,7 +9,7 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://*.pathofexile.com/trade2/*"],
+      "matches": ["https://*.pathofexile.com/trade2*"],
       "js": ["content.js"],
       "css": ["styles.css"]
     }
