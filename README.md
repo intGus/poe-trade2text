@@ -12,7 +12,7 @@ It will be useful until the PoE devs enable their native "Copy Item" button like
 ## Installation
 
 ### Step 1: Download the Extension
-1. Clone or download the repository containing the extension files.
+1. Clone or download (click the green "Code" button and select download zip)  the repository containing the extension files.
 2. Ensure the following files are present in the folder:
    - `manifest.json`
    - `content.js`
