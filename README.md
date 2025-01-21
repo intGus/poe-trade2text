@@ -1,7 +1,7 @@
 # Chrome Extension: Path of Exile 2 Trade Item Exporter
 
 ## Overview
-This Chrome extension adds an "Export" button to each item card on the Path of Exile 2 trade website. Clicking the button copies the item's information to your clipboard in a formatted text style compatible with Path of Building.
+This Chrome and Firefox extension adds an "Export" button to each item card on the Path of Exile 2 trade website. Clicking the button copies the item's information to your clipboard in a formatted text style compatible with Path of Building.
 It will be useful until the PoE devs enable their native "Copy Item" button like in PoE1 trade.
 
 ## Features
@@ -12,17 +12,23 @@ It will be useful until the PoE devs enable their native "Copy Item" button like
 ## Installation
 
 ### Step 1: Download the Extension
-1. Clone or download (click the green "Code" button and select download zip)  the repository containing the extension files.
+1. Clone or download (click the green "<> Code" button and select Download Zip) the repository containing the extension files.
 2. Ensure the following files are present in the folder:
    - `manifest.json`
    - `content.js`
    - `styles.css`
 
 ### Step 2: Load the Extension
+Chrome
 1. Open Chrome and navigate to `chrome://extensions/`.
 2. Enable **Developer Mode** in the top-right corner.
 3. Click **Load Unpacked** and select the folder containing the extension files.
 4. The extension will now appear in your list of installed extensions.
+
+Firefox
+1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`.
+2. Click Load Temporary Add-on. Select the manifest.json file from the unzipped folder.
+3. You may need to do this every time you open Firefox.
 
 ## Usage
 
@@ -48,10 +54,15 @@ It will be useful until the PoE devs enable their native "Copy Item" button like
 
 ## Uninstalling
 To remove the extension:
+Chrome:
 1. Navigate to `chrome://extensions/`.
 2. Locate the extension in your list.
 3. Click **Remove** to uninstall it from your browser.
 4. Delete the folder from your drive
+
+Firefox:
+1. Close Firefox
+2. Delete the folder from your drive
 
 ## Troubleshooting
 - **Export Button Not Appearing:** Ensure the extension is loaded and enabled in `chrome://extensions/`.
