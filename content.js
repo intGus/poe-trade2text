@@ -179,7 +179,7 @@ function addExportButtons() {
       exportButton.className = 'export-icon';
       exportButton.style.cursor = 'pointer';
 
-      exportButton.addEventListener('click', () => {
+      exportButton.addEventListener('click', (event) => {
         const itemPopup = card.querySelector(".itemPopupContainer");
         if (itemPopup) {
           const formattedText = parseItemData(itemPopup);
