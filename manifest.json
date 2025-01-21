@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PoE2 Trade Item Exporter",
   "version": "1.0",
-  "description": "Adds the hability to export the PoE2 trade items to plain text.",
+  "description": "Adds the ability to export the PoE2 trade items to plain text.",
   "permissions": ["scripting"],
   "host_permissions": [
     "https://*.pathofexile.com/*"
