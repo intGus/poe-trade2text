@@ -11,6 +11,8 @@ It will be useful until the PoE devs enable their native "Copy Item" button like
 
 ## Installation
 
+You can install the extension directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/poe2-trade-item-exporter/kilkeofnehhbhnkdmjbdhhcjgiimojfc) or [Firefox Add-Ons catalog](https://addons.mozilla.org/en-US/firefox/addon/poe2-trade-item-exporter/). Or you can follow the steps to download and install the source code: 
+
 ### Step 1: Download the Extension
 1. Clone or download (click the green "<> Code" button and select Download Zip) the repository containing the extension files.
 2. Ensure the following files are present in the folder:
@@ -19,15 +21,15 @@ It will be useful until the PoE devs enable their native "Copy Item" button like
    - `styles.css`
 
 ### Step 2: Load the Extension
-Chrome
+#### Chrome
 1. Open Chrome and navigate to `chrome://extensions/`.
 2. Enable **Developer Mode** in the top-right corner.
 3. Click **Load Unpacked** and select the folder containing the extension files.
 4. The extension will now appear in your list of installed extensions.
 
-Firefox
+#### Firefox
 1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`.
-2. Click Load Temporary Add-on. Select the manifest.json file from the unzipped folder.
+2. Click **Load Temporary Add-on**. Select the manifest.json file from the unzipped folder.
 3. You may need to do this every time you open Firefox.
 
 ## Usage
