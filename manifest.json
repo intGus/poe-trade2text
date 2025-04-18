@@ -3,15 +3,31 @@
   "name": "PoE2 Trade Item Exporter",
   "version": "1.0",
   "description": "Adds the ability to export the PoE2 trade items to plain text.",
-  "permissions": ["scripting"],
+  "permissions": [
+    "scripting"
+  ],
   "host_permissions": [
-    "https://*.pathofexile.com/*"
+    "https://*.pathofexile.com/*",
+    "https://poe.game.daum.net/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://*.pathofexile.com/trade2*"],
-      "js": ["content.js"],
-      "css": ["styles.css"]
+      "matches": [
+        "https://*.pathofexile.com/trade2*",
+        "https://poe.game.daum.net/trade2*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "poe2tradeHE6KE7HOCC3TCS0AYA03@firefoxextension",
+      "strict_min_version": "58.0"
+    }
+  }
 }
