@@ -81,6 +81,11 @@ function parseItemData(itemElement) {
     .map((mod) => `${mod.textContent.trim()} (implicit)`)
     .join("\n");
 
+    // Extract fractured mods
+    const fracturedMods = Array.from(itemElement.querySelectorAll(".fracturedMod .s"))
+    .map((mod) => mod.textContent.trim())
+    .join("\n");
+
   // Extract explicit mods
   const explicitMods = Array.from(itemElement.querySelectorAll(".explicitMod .s"))
     .map((mod) => mod.textContent.trim())
@@ -110,6 +115,7 @@ function parseItemData(itemElement) {
     skillProperties ? skillProperties : "",
     implicitMods ? implicitMods : "",
     implicitMods ? "--------" : "",
+    fracturedMods ? fracturedMods : "",
     explicitMods ? `${explicitMods}` : "",
     unmet ? "--------" : "",
     unmet ? unmet : "",
