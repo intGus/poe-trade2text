@@ -82,13 +82,18 @@ function parseItemData(itemElement) {
     .join("\n");
 
     // Extract fractured mods
-    const fracturedMods = Array.from(itemElement.querySelectorAll(".fracturedMod .s"))
-    .map((mod) => mod.textContent.trim())
+  const fracturedMods = Array.from(itemElement.querySelectorAll(".fracturedMod .s"))
+    .map((mod) => `${mod.textContent.trim()} (fractured)`)
     .join("\n");
 
   // Extract explicit mods
   const explicitMods = Array.from(itemElement.querySelectorAll(".explicitMod .s"))
     .map((mod) => mod.textContent.trim())
+    .join("\n");
+
+  // Extract desecrated mods
+  const desecratedMods = Array.from(itemElement.querySelectorAll(".desecratedMod .s"))
+    .map((mod) => `${mod.textContent.trim()} (desecrated)`)
     .join("\n");
 
   // Extract unmet and augmented
@@ -113,10 +118,12 @@ function parseItemData(itemElement) {
     runeMods ? runeMods : "",
     runeMods ? "--------" : "",
     skillProperties ? skillProperties : "",
+    skillProperties ? "--------" : "",
     implicitMods ? implicitMods : "",
     implicitMods ? "--------" : "",
     fracturedMods ? fracturedMods : "",
     explicitMods ? `${explicitMods}` : "",
+    desecratedMods ? desecratedMods : "",
     unmet ? "--------" : "",
     unmet ? unmet : "",
     augmented ? "--------" : "",
