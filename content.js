@@ -1,5 +1,5 @@
 // Parse item data and return formatted text
-function parseItemData(itemElement) {
+function parseItemData(itemElement, cardElement) {
   const rarityMap = {
     rarePopup: "Rare",
     magicPopup: "Magic",
@@ -33,6 +33,19 @@ function parseItemData(itemElement) {
     .filter((prop) => prop.classList.contains("skill")) // Include only skill properties
     .map((prop) => `${prop.textContent.trim()} (implicit)`)
     .join("\n");
+  
+  // Extract Number of sockets
+  let numberOfSockets = "";
+  const socketsElement = cardElement.querySelector(".sockets");
+  if (socketsElement) {
+      const socketsClass = Array.from(socketsElement.classList).find(cls => cls.startsWith('numSockets'));
+      if (socketsClass) {
+          const socketsMatch = socketsClass.match(/numSockets(\d+)/);
+          if (socketsMatch && socketsMatch[1]) {
+              numberOfSockets = `Number of sockets: ${socketsMatch[1]}`;
+          }
+      }
+  }
 
   // Extract requirements dynamically
   const requirementsElement = itemElement.querySelector(".requirements");
@@ -99,6 +112,17 @@ function parseItemData(itemElement) {
   // Extract unmet and augmented
   const unmet = itemElement.querySelector(".unmet")?.textContent.trim() || "";
   const augmented = itemElement.querySelector(".augmented span")?.textContent.trim() || "";
+  
+  // Extract Asking Price
+  let askingPrice = "";
+  const priceAmountElement = cardElement.querySelector('.price span[data-field="price"] > span:nth-of-type(2)');
+  const priceCurrencyElement = cardElement.querySelector('.price .currency-text span');
+  if (priceAmountElement && priceCurrencyElement) {
+      const amount = priceAmountElement.textContent.trim();
+      const currency = priceCurrencyElement.textContent.trim();
+      askingPrice = `Asking Price: ${amount} | ${currency}`;
+  }
+
 
   // Construct the formatted text
   const sections = [
@@ -109,6 +133,8 @@ function parseItemData(itemElement) {
     `--------`,
     properties,
     properties ? "--------" : "",
+    numberOfSockets ? numberOfSockets : "0",
+    numberOfSockets ? "--------" : "",
     parsedRequirements.length > 0 ? `Requirements:\n${parsedRequirements.join("\n")}` : "",
     parsedRequirements.length > 0 ? "--------" : "",
     itemLevel ? `Item Level: ${itemLevel}` : "",
@@ -128,6 +154,8 @@ function parseItemData(itemElement) {
     unmet ? unmet : "",
     augmented ? "--------" : "",
     augmented ? augmented : "",
+    askingPrice ? "--------" : "",
+    askingPrice ? askingPrice : "",
   ];
 
   // Filter sections and join
@@ -195,7 +223,7 @@ function addExportButtons() {
       exportButton.addEventListener('click', (event) => {
         const itemPopup = card.querySelector(".itemPopupContainer");
         if (itemPopup) {
-          const formattedText = parseItemData(itemPopup);
+          const formattedText = parseItemData(itemPopup, card);
           copyToClipboard(formattedText);
           showToast('Copied to clipboard!', event.currentTarget);
           // alert("Copied to clipboard:\n" + formattedText); // for debug
