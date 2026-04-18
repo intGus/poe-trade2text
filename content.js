@@ -28,10 +28,10 @@ function parseItemData(itemElement) {
     .map((prop) => prop.textContent.trim())
     .join("\n");
 
-  // Extract skill properties as implicit mods
+  // Extract skill gem properties
   const skillProperties = propertyElements
     .filter((prop) => prop.classList.contains("skill")) // Include only skill properties
-    .map((prop) => `${prop.textContent.trim()} (implicit)`)
+    .map((prop) => prop.textContent.trim())
     .join("\n");
 
   // Extract requirements dynamically
@@ -97,8 +97,12 @@ function parseItemData(itemElement) {
     .join("\n");
 
   // Extract unmet and augmented
-  const unmet = itemElement.querySelector(".unmet")?.textContent.trim() || "";
-  const augmented = itemElement.querySelector(".augmented span")?.textContent.trim() || "";
+  const unmet = Array.from(itemElement.querySelectorAll(".unmet"))
+    .map((el) => el.textContent.trim())
+    .join("\n");
+  const augmented = Array.from(itemElement.querySelectorAll(".augmented span"))
+    .map((el) => el.textContent.trim())
+    .join("\n");
 
   // Construct the formatted text
   const sections = [
@@ -222,14 +226,20 @@ function copyToClipboard(text) {
 }
 
 // Main observer logic
-const mainObserver = new MutationObserver((mutations, obs) => {
+let resultSetObserver = null;
+let observedResultSet = null;
+
+const mainObserver = new MutationObserver(() => {
   const resultSet = document.querySelector('.resultset');
-  if (resultSet) {
+  if (resultSet && resultSet !== observedResultSet) {
     //console.log("Result set found:", resultSet); // for debug
 
-    //obs.disconnect();
+    if (resultSetObserver) {
+      resultSetObserver.disconnect();
+    }
 
-    const resultSetObserver = new MutationObserver(() => {
+    observedResultSet = resultSet;
+    resultSetObserver = new MutationObserver(() => {
       addExportButtons();
     });
 
