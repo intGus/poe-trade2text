@@ -1,148 +1,140 @@
 // Parse item data and return formatted text
 function parseItemData(itemElement) {
   const rarityMap = {
-    rarePopup: "Rare",
-    magicPopup: "Magic",
-    normalPopup: "Normal",
-    uniquePopup: "Unique",
+    'item-popup--rare': 'Rare',
+    'item-popup--magic': 'Magic',
+    'item-popup--normal': 'Normal',
+    'item-popup--unique': 'Unique',
+    rarePopup: 'Rare',
+    magicPopup: 'Magic',
+    normalPopup: 'Normal',
+    uniquePopup: 'Unique',
   };
 
-  // Extract item class
-  const itemClass = itemElement.querySelector(".property .lc span")?.textContent.trim() || "";
+  // Rarity class is on the outer .item-popup div (parent of .item-popup__content)
+  let el = itemElement;
+  let rarityClass = null;
+  while (el && !rarityClass) {
+    rarityClass = Array.from(el.classList).find(c => rarityMap[c]);
+    el = el.parentElement;
+  }
+  const rarity = rarityMap[rarityClass] || 'Normal';
 
-  // Extract rarity
-  const rarityClass = Array.from(itemElement.classList).find((cls) =>
-    Object.keys(rarityMap).includes(cls)
-  );
-  const rarity = rarityMap[rarityClass] || "Unknown";
+  // Item name and type line are in .item-popup__header-line (sibling of .item-popup__content)
+  const popup = itemElement.closest('.item-popup') || itemElement.parentElement;
+  const headerLines = Array.from(popup?.querySelectorAll('.item-popup__header-line') || []);
+  const itemName = headerLines[0]?.textContent.trim() || '';
+  const typeLine = headerLines[1]?.textContent.trim() || '';
 
-  // Extract item names
-  const itemName = itemElement.querySelector(".itemName .lc")?.textContent.trim() || "";
-  const typeLine = itemElement.querySelector(".itemName.typeLine .lc")?.textContent.trim() || "";
+  // Item class: property whose inner span has [type] but NO [data-field]
+  const classSpan = itemElement.querySelector('.item-popup__property span[type]:not([data-field])');
+  const itemClass = classSpan?.querySelector('span')?.textContent.trim()
+    || classSpan?.textContent.trim()
+    || '';
 
-  // Extract all properties, skip the first one (item class)
-  const propertyElements = Array.from(itemElement.querySelectorAll(".property"));
-  const properties = propertyElements
-    .filter((prop) => !prop.classList.contains("skill")) // Exclude skill properties
-    .slice(1) // Skip the first property (item class)
-    .map((prop) => prop.textContent.trim())
-    .join("\n");
+  // Stat properties: have .s[data-field], excluding ilvl and requirements
+  const statProperties = Array.from(
+    itemElement.querySelectorAll('.item-popup__property:not(.item-popup__property--requirements)')
+  ).filter(p => {
+    const s = p.querySelector('.s[data-field]');
+    return s && s.getAttribute('data-field') !== 'ilvl';
+  });
 
-  // Extract skill gem properties
-  const skillProperties = propertyElements
-    .filter((prop) => prop.classList.contains("skill")) // Include only skill properties
-    .map((prop) => prop.textContent.trim())
-    .join("\n");
+  const properties = statProperties
+    .filter(p => !p.classList.contains('skill'))
+    .map(p => p.textContent.trim())
+    .join('\n');
 
-  // Extract requirements dynamically
-  const requirementsElement = itemElement.querySelector(".requirements");
-  const requirementsText = requirementsElement?.textContent.trim() || "";
+  const skillProperties = statProperties
+    .filter(p => p.classList.contains('skill'))
+    .map(p => p.textContent.trim())
+    .join('\n');
+
+  // Requirements via data-field attributes
+  const reqEl = itemElement.querySelector('.item-popup__property--requirements');
   const parsedRequirements = [];
-  if (requirementsText.includes("Level")) {
-    const levelMatch = requirementsText.match(/Level\s(\d+)/);
-    if (levelMatch) {
-      parsedRequirements.push(`Level: ${levelMatch[1]}`);
-    }
-  }
-  if (requirementsText.includes("Dex")) {
-    const dexMatch = requirementsText.match(/(\d+)\sDex/);
-    if (dexMatch) {
-      parsedRequirements.push(`Dex: ${dexMatch[1]}`);
-    }
-  }
-  if (requirementsText.includes("Int")) {
-    const intMatch = requirementsText.match(/(\d+)\sInt/);
-    if (intMatch) {
-      parsedRequirements.push(`Int: ${intMatch[1]}`);
-    }
-  }
-  if (requirementsText.includes("Str")) {
-    const strMatch = requirementsText.match(/(\d+)\sStr/);
-    if (strMatch) {
-      parsedRequirements.push(`Str: ${strMatch[1]}`);
-    }
+  if (reqEl) {
+    const lvlEl = reqEl.querySelector('[data-field="lvl"]');
+    const strEl = reqEl.querySelector('[data-field="str"]');
+    const dexEl = reqEl.querySelector('[data-field="dex"]');
+    const intEl = reqEl.querySelector('[data-field="int"]');
+    // Level: <span>Level</span> <span>39</span> → value is last-child
+    const lvl = lvlEl?.querySelector('span:last-child')?.textContent.trim();
+    // Str/Dex/Int: <span>70</span> <span>Dex</span> → value is first-child
+    const str = strEl?.querySelector('span:first-child')?.textContent.trim();
+    const dex = dexEl?.querySelector('span:first-child')?.textContent.trim();
+    const int_ = intEl?.querySelector('span:first-child')?.textContent.trim();
+    if (lvl) parsedRequirements.push(`Level: ${lvl}`);
+    if (str) parsedRequirements.push(`Str: ${str}`);
+    if (dex) parsedRequirements.push(`Dex: ${dex}`);
+    if (int_) parsedRequirements.push(`Int: ${int_}`);
   }
 
-  // Extract item level
-  const itemLevel = itemElement.querySelector(".itemLevel .colourDefault")?.textContent.trim() || "";
+  // Item level: value is in the last child span of [data-field="ilvl"]
+  const ilvlEl = itemElement.querySelector('[data-field="ilvl"]');
+  const itemLevel = ilvlEl?.querySelector('span:last-child')?.textContent.trim() || '';
 
-  // Extract enchant mods
-  const enchantMods = Array.from(itemElement.querySelectorAll(".enchantMod .s"))
-    .map((mod) => `${mod.textContent.trim()} (enchant)`)
-    .join("\n");
+  // Mods — new structure: .item-mod--TYPE contains .s span with mod text
+  const enchantMods = Array.from(itemElement.querySelectorAll('.item-mod--enchant .s'))
+    .map(m => `${m.textContent.trim()} (enchant)`).join('\n');
 
-  // Extract rune mods
-  const runeMods = Array.from(itemElement.querySelectorAll(".runeMod .s"))
-    .map((mod) => `${mod.textContent.trim()} (rune)`)
-    .join("\n");
+  const runeMods = Array.from(itemElement.querySelectorAll('.item-mod--rune .s'))
+    .map(m => `${m.textContent.trim()} (rune)`).join('\n');
 
-  // Extract implicit mods
-  const implicitMods = Array.from(itemElement.querySelectorAll(".implicitMod .s"))
-    .map((mod) => `${mod.textContent.trim()} (implicit)`)
-    .join("\n");
+  const implicitMods = Array.from(itemElement.querySelectorAll('.item-mod--implicit .s'))
+    .map(m => `${m.textContent.trim()} (implicit)`).join('\n');
 
-    // Extract fractured mods
-  const fracturedMods = Array.from(itemElement.querySelectorAll(".fracturedMod .s"))
-    .map((mod) => `${mod.textContent.trim()} (fractured)`)
-    .join("\n");
+  const fracturedMods = Array.from(itemElement.querySelectorAll('.item-mod--fractured .s'))
+    .map(m => `${m.textContent.trim()} (fractured)`).join('\n');
 
-  // Extract explicit mods
-  const explicitMods = Array.from(itemElement.querySelectorAll(".explicitMod .s"))
-    .map((mod) => mod.textContent.trim())
-    .join("\n");
+  const explicitMods = Array.from(itemElement.querySelectorAll('.item-mod--explicit .s'))
+    .map(m => m.textContent.trim()).join('\n');
 
-  // Extract desecrated mods
-  const desecratedMods = Array.from(itemElement.querySelectorAll(".desecratedMod .s"))
-    .map((mod) => `${mod.textContent.trim()} (desecrated)`)
-    .join("\n");
+  const desecratedMods = Array.from(
+    itemElement.querySelectorAll('.item-mod--desecrated .s, .item-mod--corrupted .s')
+  ).map(m => `${m.textContent.trim()} (desecrated)`).join('\n');
 
-  // Extract unmet and augmented
-  const unmet = Array.from(itemElement.querySelectorAll(".unmet"))
-    .map((el) => el.textContent.trim())
-    .join("\n");
-  const augmented = Array.from(itemElement.querySelectorAll(".augmented span"))
-    .map((el) => el.textContent.trim())
-    .join("\n");
+  const unmet = Array.from(itemElement.querySelectorAll('.unmet'))
+    .map(e => e.textContent.trim()).join('\n');
 
-  // Construct the formatted text
+  const augmented = Array.from(itemElement.querySelectorAll('.augmented span'))
+    .map(e => e.textContent.trim()).join('\n');
+
   const sections = [
-    `Item Class: ${itemClass}`,
+    itemClass ? `Item Class: ${itemClass}` : '',
     `Rarity: ${rarity}`,
-    `${itemName}`,
-    `${typeLine}`,
-    `--------`,
+    itemName,
+    typeLine,
+    '--------',
     properties,
-    properties ? "--------" : "",
-    parsedRequirements.length > 0 ? `Requirements:\n${parsedRequirements.join("\n")}` : "",
-    parsedRequirements.length > 0 ? "--------" : "",
-    itemLevel ? `Item Level: ${itemLevel}` : "",
-    itemLevel ? "--------" : "",
-    enchantMods ? enchantMods : "",
-    enchantMods ? "--------" : "",
-    runeMods ? runeMods : "",
-    runeMods ? "--------" : "",
-    skillProperties ? skillProperties : "",
-    skillProperties ? "--------" : "",
-    implicitMods ? implicitMods : "",
-    implicitMods ? "--------" : "",
-    fracturedMods ? fracturedMods : "",
-    explicitMods ? `${explicitMods}` : "",
-    desecratedMods ? desecratedMods : "",
-    unmet ? "--------" : "",
-    unmet ? unmet : "",
-    augmented ? "--------" : "",
-    augmented ? augmented : "",
+    properties ? '--------' : '',
+    parsedRequirements.length > 0 ? `Requirements:\n${parsedRequirements.join('\n')}` : '',
+    parsedRequirements.length > 0 ? '--------' : '',
+    itemLevel ? `Item Level: ${itemLevel}` : '',
+    itemLevel ? '--------' : '',
+    enchantMods,
+    enchantMods ? '--------' : '',
+    runeMods,
+    runeMods ? '--------' : '',
+    skillProperties,
+    skillProperties ? '--------' : '',
+    implicitMods,
+    implicitMods ? '--------' : '',
+    fracturedMods,
+    explicitMods,
+    desecratedMods,
+    unmet ? '--------' : '',
+    unmet,
+    augmented ? '--------' : '',
+    augmented,
   ];
 
-  // Filter sections and join
-  return sections.filter((section) => section.trim() !== "").join("\n");
+  return sections.filter(s => s.trim() !== '').join('\n');
 }
 
 function createToastContainer() {
-  // Check if toast container exists
   if (document.querySelector('#toast-container')) return;
 
-  // Create the toast container
   const toastContainer = document.createElement('div');
   toastContainer.id = 'toast-container';
   toastContainer.style.position = 'fixed';
@@ -169,15 +161,12 @@ function showToast(message, targetElement) {
   toast.style.position = 'absolute';
   toast.style.zIndex = '9999';
 
-  // Get the button position
   const rect = targetElement.getBoundingClientRect();
-  toast.style.top = `${rect.top + window.scrollY - 40}px`; // 40px above the button
-  toast.style.left = `${rect.left + window.scrollX}px`; // Align with the button's left edge
+  toast.style.top = `${rect.top + window.scrollY - 40}px`;
+  toast.style.left = `${rect.left + window.scrollX}px`;
 
-  // Append the toast to the body
   document.body.appendChild(toast);
 
-  // Remove the toast after 3 seconds
   setTimeout(() => {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
@@ -185,7 +174,7 @@ function showToast(message, targetElement) {
 }
 
 function addExportButtons() {
-  const cards = document.querySelectorAll(".resultset .row");
+  const cards = document.querySelectorAll('.resultset .row');
 
   cards.forEach((card) => {
     const leftDiv = card.querySelector('.left');
@@ -197,12 +186,15 @@ function addExportButtons() {
       exportButton.style.cursor = 'pointer';
 
       exportButton.addEventListener('click', (event) => {
-        const itemPopup = card.querySelector(".itemPopupContainer");
+        // Try new selector first, fall back to old
+        const itemPopup =
+          card.querySelector('.item-popup__content') ||
+          card.querySelector('.itemPopupContainer');
         if (itemPopup) {
           const formattedText = parseItemData(itemPopup);
           copyToClipboard(formattedText);
           showToast('Copied to clipboard!', event.currentTarget);
-          // alert("Copied to clipboard:\n" + formattedText); // for debug
+          // console.log("Copied:\n" + formattedText); // for debug
         } else {
           showToast('Item details not found!', event.currentTarget);
         }
@@ -213,15 +205,10 @@ function addExportButtons() {
   });
 }
 
-// Function to copy text to clipboard
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(
-    () => {
-      //console.log("Text copied to clipboard:", text); // for debug
-    },
-    (err) => {
-      console.error("Could not copy text to clipboard:", err);
-    }
+    () => {},
+    (err) => { console.error('Could not copy text to clipboard:', err); }
   );
 }
 
@@ -232,8 +219,6 @@ let observedResultSet = null;
 const mainObserver = new MutationObserver(() => {
   const resultSet = document.querySelector('.resultset');
   if (resultSet && resultSet !== observedResultSet) {
-    //console.log("Result set found:", resultSet); // for debug
-
     if (resultSetObserver) {
       resultSetObserver.disconnect();
     }
