@@ -5,6 +5,8 @@ function parseItemData(itemElement) {
     'item-popup--magic': 'Magic',
     'item-popup--normal': 'Normal',
     'item-popup--unique': 'Unique',
+    'item-popup--runic-unique': 'Unique',
+    'item-popup--runic-rare': 'Rare',
     rarePopup: 'Rare',
     magicPopup: 'Magic',
     normalPopup: 'Normal',
@@ -32,21 +34,16 @@ function parseItemData(itemElement) {
     || classSpan?.textContent.trim()
     || '';
 
-  // Stat properties: have .s[data-field], excluding ilvl and requirements
+  // Stat properties: have .s[data-field] (excluding ilvl), or are skill-granting properties
   const statProperties = Array.from(
     itemElement.querySelectorAll('.item-popup__property:not(.item-popup__property--requirements)')
   ).filter(p => {
+    if (p.classList.contains('item-popup__property--skill')) return true;
     const s = p.querySelector('.s[data-field]');
     return s && s.getAttribute('data-field') !== 'ilvl';
   });
 
   const properties = statProperties
-    .filter(p => !p.classList.contains('skill'))
-    .map(p => p.textContent.trim())
-    .join('\n');
-
-  const skillProperties = statProperties
-    .filter(p => p.classList.contains('skill'))
     .map(p => p.textContent.trim())
     .join('\n');
 
@@ -94,11 +91,13 @@ function parseItemData(itemElement) {
     itemElement.querySelectorAll('.item-mod--desecrated .s, .item-mod--corrupted .s')
   ).map(m => `${m.textContent.trim()} (desecrated)`).join('\n');
 
-  const unmet = Array.from(itemElement.querySelectorAll('.unmet'))
-    .map(e => e.textContent.trim()).join('\n');
+  // Mutated mods (Vaal corruption) use .lc span instead of .s
+  const mutatedMods = Array.from(itemElement.querySelectorAll('.item-mod--mutated .lc'))
+    .map(m => `${m.textContent.trim()} (vaal)`)
+    .join('\n');
 
-  const augmented = Array.from(itemElement.querySelectorAll('.augmented span'))
-    .map(e => e.textContent.trim()).join('\n');
+  // Corrupted indicator uses inline style, not a class
+  const corrupted = itemElement.querySelector('span[style*="colour-unmet"]')?.textContent.trim() || '';
 
   const sections = [
     itemClass ? `Item Class: ${itemClass}` : '',
@@ -116,17 +115,14 @@ function parseItemData(itemElement) {
     enchantMods ? '--------' : '',
     runeMods,
     runeMods ? '--------' : '',
-    skillProperties,
-    skillProperties ? '--------' : '',
     implicitMods,
     implicitMods ? '--------' : '',
     fracturedMods,
     explicitMods,
+    mutatedMods,
     desecratedMods,
-    unmet ? '--------' : '',
-    unmet,
-    augmented ? '--------' : '',
-    augmented,
+    corrupted ? '--------' : '',
+    corrupted,
   ];
 
   return sections.filter(s => s.trim() !== '').join('\n');
