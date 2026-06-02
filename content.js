@@ -99,8 +99,10 @@ function parseItemData(itemElement) {
     .map(m => `${m.textContent.trim()} (vaal)`)
     .join('\n');
 
-  // Corrupted indicator uses inline style, not a class
-  const corrupted = itemElement.querySelector('span[style*="colour-unmet"]')?.textContent.trim() || '';
+  // Item status indicators (Corrupted, Mirrored) use inline style, not a class
+  const corrupted = itemElement.querySelector('span.lc[style*="colour-unmet"]')?.textContent.trim() || '';
+  const mirrored = itemElement.querySelector('span.lc[style*="colour-augmented"]')?.textContent.trim() || '';
+  const itemStatus = [corrupted, mirrored].filter(Boolean).join('\n');
 
   const sections = [
     itemClass ? `Item Class: ${itemClass}` : '',
@@ -125,8 +127,8 @@ function parseItemData(itemElement) {
     craftedMods,
     mutatedMods,
     desecratedMods,
-    corrupted ? '--------' : '',
-    corrupted,
+    itemStatus ? '--------' : '',
+    itemStatus,
   ];
 
   return sections.filter(s => s.trim() !== '').join('\n');
