@@ -87,6 +87,9 @@ function parseItemData(itemElement) {
   const explicitMods = Array.from(itemElement.querySelectorAll('.item-mod--explicit .s'))
     .map(m => m.textContent.trim()).join('\n');
 
+  const craftedMods = Array.from(itemElement.querySelectorAll('.item-mod--crafted .s'))
+    .map(m => `${m.textContent.trim()} (crafted)`).join('\n');
+
   const desecratedMods = Array.from(
     itemElement.querySelectorAll('.item-mod--desecrated .s, .item-mod--corrupted .s')
   ).map(m => `${m.textContent.trim()} (desecrated)`).join('\n');
@@ -119,6 +122,7 @@ function parseItemData(itemElement) {
     implicitMods ? '--------' : '',
     fracturedMods,
     explicitMods,
+    craftedMods,
     mutatedMods,
     desecratedMods,
     corrupted ? '--------' : '',
