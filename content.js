@@ -1,5 +1,5 @@
 // Parse item data and return formatted text
-function parseItemData(itemElement) {
+function parseItemData(itemElement, sockets = '') {
   const rarityMap = {
     'item-popup--rare': 'Rare',
     'item-popup--magic': 'Magic',
@@ -114,6 +114,8 @@ function parseItemData(itemElement) {
     properties ? '--------' : '',
     parsedRequirements.length > 0 ? `Requires: ${parsedRequirements.join(', ')}` : '',
     parsedRequirements.length > 0 ? '--------' : '',
+    sockets ? `Sockets: ${sockets}` : '',
+    sockets ? '--------' : '',
     itemLevel ? `Item Level: ${itemLevel}` : '',
     itemLevel ? '--------' : '',
     enchantMods,
@@ -193,7 +195,9 @@ function addExportButtons() {
           card.querySelector('.item-popup__content') ||
           card.querySelector('.itemPopupContainer');
         if (itemPopup) {
-          const formattedText = parseItemData(itemPopup);
+          const socketEls = Array.from(card.querySelectorAll('.left .socket'));
+          const sockets = socketEls.map(s => s.classList.contains('socket--rune') ? 'S' : '-').join(' ');
+          const formattedText = parseItemData(itemPopup, sockets);
           copyToClipboard(formattedText);
           showToast('Copied to clipboard!', event.currentTarget);
           // console.log("Copied:\n" + formattedText); // for debug
