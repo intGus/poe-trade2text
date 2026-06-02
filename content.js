@@ -61,10 +61,10 @@ function parseItemData(itemElement) {
     const str = strEl?.querySelector('span:first-child')?.textContent.trim();
     const dex = dexEl?.querySelector('span:first-child')?.textContent.trim();
     const int_ = intEl?.querySelector('span:first-child')?.textContent.trim();
-    if (lvl) parsedRequirements.push(`Level: ${lvl}`);
-    if (str) parsedRequirements.push(`Str: ${str}`);
-    if (dex) parsedRequirements.push(`Dex: ${dex}`);
-    if (int_) parsedRequirements.push(`Int: ${int_}`);
+    if (lvl) parsedRequirements.push(`Level ${lvl}`);
+    if (str) parsedRequirements.push(`${str} Str`);
+    if (dex) parsedRequirements.push(`${dex} Dex`);
+    if (int_) parsedRequirements.push(`${int_} Int`);
   }
 
   // Item level: value is in the last child span of [data-field="ilvl"]
@@ -112,7 +112,7 @@ function parseItemData(itemElement) {
     '--------',
     properties,
     properties ? '--------' : '',
-    parsedRequirements.length > 0 ? `Requirements:\n${parsedRequirements.join('\n')}` : '',
+    parsedRequirements.length > 0 ? `Requires: ${parsedRequirements.join(', ')}` : '',
     parsedRequirements.length > 0 ? '--------' : '',
     itemLevel ? `Item Level: ${itemLevel}` : '',
     itemLevel ? '--------' : '',
